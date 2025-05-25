@@ -83,12 +83,12 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
         {/* Property Type */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-gray-700">Property Type</Label>
-          <Select value={filters.propertyType} onValueChange={(value) => updateFilter("propertyType", value)}>
+          <Select value={filters.propertyType} onValueChange={(value) => updateFilter("propertyType", value === "all" ? "" : value)}>
             <SelectTrigger>
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="house">House</SelectItem>
               <SelectItem value="apartment">Apartment</SelectItem>
               <SelectItem value="townhouse">Townhouse</SelectItem>
@@ -100,12 +100,12 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
         {/* Bedrooms */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-gray-700">Minimum Bedrooms</Label>
-          <Select value={filters.bedrooms} onValueChange={(value) => updateFilter("bedrooms", value)}>
+          <Select value={filters.bedrooms} onValueChange={(value) => updateFilter("bedrooms", value === "any" ? "" : value)}>
             <SelectTrigger>
               <SelectValue placeholder="Any" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any</SelectItem>
+              <SelectItem value="any">Any</SelectItem>
               <SelectItem value="1">1+</SelectItem>
               <SelectItem value="2">2+</SelectItem>
               <SelectItem value="3">3+</SelectItem>
@@ -118,12 +118,12 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
         {/* Bathrooms */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-gray-700">Minimum Bathrooms</Label>
-          <Select value={filters.bathrooms} onValueChange={(value) => updateFilter("bathrooms", value)}>
+          <Select value={filters.bathrooms} onValueChange={(value) => updateFilter("bathrooms", value === "any" ? "" : value)}>
             <SelectTrigger>
               <SelectValue placeholder="Any" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any</SelectItem>
+              <SelectItem value="any">Any</SelectItem>
               <SelectItem value="1">1+</SelectItem>
               <SelectItem value="2">2+</SelectItem>
               <SelectItem value="3">3+</SelectItem>
