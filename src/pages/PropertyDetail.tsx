@@ -1,10 +1,12 @@
+
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { ArrowLeft, MapPin, Bed, Bath, Square, Car, Wifi, Dumbbell, Waves } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 
-const mockProperty = {
+const baseMockProperty = {
   id: 1,
   title: "Modern Downtown Apartment",
   price: 750000,
@@ -29,16 +31,48 @@ const mockProperty = {
     { icon: Car, label: "Parking Included" }
   ],
   agent: {
-    name: "Sarah Johnson",
+    name: "Loading...",
     phone: "(555) 123-4567",
-    email: "sarah@estateview.com",
+    email: "agent@estateview.com",
     image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face"
   }
 };
 
 const PropertyDetail = () => {
   const { id } = useParams();
-  const property = mockProperty; // In real app, fetch by ID
+  const [property, setProperty] = useState(baseMockProperty);
+
+  // Fetch Indian agent name
+  useEffect(() => {
+    const fetchAgentName = async () => {
+      try {
+        const response = await fetch('https://api.namefake.com/indian-names/random/1');
+        const names = await response.json();
+        
+        setProperty(prev => ({
+          ...prev,
+          agent: {
+            ...prev.agent,
+            name: names[0] || "Rajesh Kumar Sharma",
+            email: `${names[0]?.toLowerCase().replace(/\s+/g, '.')}@estateview.com` || "agent@estateview.com"
+          }
+        }));
+      } catch (error) {
+        console.log('Failed to fetch Indian name, using fallback');
+        // Fallback Indian name if API fails
+        setProperty(prev => ({
+          ...prev,
+          agent: {
+            ...prev.agent,
+            name: "Rajesh Kumar Sharma",
+            email: "rajesh.kumar.sharma@estateview.com"
+          }
+        }));
+      }
+    };
+
+    fetchAgentName();
+  }, []);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -189,7 +223,7 @@ const PropertyDetail = () => {
                     Call {property.agent.phone}
                   </Button>
                   <Button variant="outline" className="w-full">
-                    Send Message
+                    Email {property.agent.name.split(' ')[0]}
                   </Button>
                   <Button variant="outline" className="w-full">
                     Schedule Tour

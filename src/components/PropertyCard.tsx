@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Square } from "lucide-react";
+import { MapPin, Bed, Bath, Square, User } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 
 interface Property {
@@ -13,6 +13,7 @@ interface Property {
   image: string;
   address: string;
   type: string;
+  agentName?: string;
 }
 
 interface PropertyCardProps {
@@ -58,6 +59,13 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             <MapPin className="h-4 w-4 mr-1" />
             <span className="text-sm">{property.address}</span>
           </div>
+
+          {property.agentName && (
+            <div className="flex items-center text-gray-600 mb-3">
+              <User className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">{property.agentName}</span>
+            </div>
+          )}
           
           <div className="flex items-center justify-between text-sm text-gray-700">
             <div className="flex items-center space-x-4">

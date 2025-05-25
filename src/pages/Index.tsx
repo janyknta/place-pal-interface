@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Search, Menu, X } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
@@ -8,7 +8,7 @@ import FilterSidebar from "../components/FilterSidebar";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 
-const mockProperties = [
+const baseMockProperties = [
   {
     id: 1,
     title: "Modern Downtown Apartment",
@@ -20,7 +20,8 @@ const mockProperties = [
     address: "123 Main St, Downtown",
     lat: 40.7589,
     lng: -73.9851,
-    type: "apartment"
+    type: "apartment",
+    agentName: "Loading..."
   },
   {
     id: 2,
@@ -33,7 +34,8 @@ const mockProperties = [
     address: "456 Oak Avenue, Suburbs",
     lat: 40.7505,
     lng: -73.9934,
-    type: "house"
+    type: "house",
+    agentName: "Loading..."
   },
   {
     id: 3,
@@ -46,7 +48,8 @@ const mockProperties = [
     address: "789 Creative District",
     lat: 40.7614,
     lng: -73.9776,
-    type: "apartment"
+    type: "apartment",
+    agentName: "Loading..."
   },
   {
     id: 4,
@@ -59,7 +62,8 @@ const mockProperties = [
     address: "101 Skyline Tower",
     lat: 40.7549,
     lng: -73.9840,
-    type: "apartment"
+    type: "apartment",
+    agentName: "Loading..."
   },
   {
     id: 5,
@@ -72,7 +76,8 @@ const mockProperties = [
     address: "234 Historic Lane",
     lat: 40.7505,
     lng: -73.9888,
-    type: "townhouse"
+    type: "townhouse",
+    agentName: "Loading..."
   },
   {
     id: 6,
@@ -85,7 +90,8 @@ const mockProperties = [
     address: "567 Harbor View",
     lat: 40.7632,
     lng: -73.9712,
-    type: "apartment"
+    type: "apartment",
+    agentName: "Loading..."
   }
 ];
 
@@ -93,6 +99,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mockProperties, setMockProperties] = useState(baseMockProperties);
   const [filters, setFilters] = useState({
     minPrice: "",
     maxPrice: "",
@@ -101,9 +108,47 @@ const Index = () => {
     propertyType: "",
   });
 
+  // Fetch Indian names from API
+  useEffect(() => {
+    const fetchIndianNames = async () => {
+      try {
+        const response = await fetch('https://api.namefake.com/indian-names/random/6');
+        const names = await response.json();
+        
+        const updatedProperties = baseMockProperties.map((property, index) => ({
+          ...property,
+          agentName: names[index] || `Agent ${index + 1}`
+        }));
+        
+        setMockProperties(updatedProperties);
+      } catch (error) {
+        console.log('Failed to fetch Indian names, using fallback names');
+        // Fallback Indian names if API fails
+        const fallbackNames = [
+          "Rajesh Kumar Sharma",
+          "Priya Patel",
+          "Amit Singh",
+          "Sunita Gupta",
+          "Vikram Choudhury",
+          "Kavita Joshi"
+        ];
+        
+        const updatedProperties = baseMockProperties.map((property, index) => ({
+          ...property,
+          agentName: fallbackNames[index] || `Agent ${index + 1}`
+        }));
+        
+        setMockProperties(updatedProperties);
+      }
+    };
+
+    fetchIndianNames();
+  }, []);
+
   const filteredProperties = mockProperties.filter(property => {
     const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         property.address.toLowerCase().includes(searchQuery.toLowerCase());
+                         property.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         property.agentName.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesPrice = (!filters.minPrice || property.price >= parseInt(filters.minPrice)) &&
                         (!filters.maxPrice || property.price <= parseInt(filters.maxPrice));
@@ -129,7 +174,7 @@ const Index = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Search by location or property name..."
+                  placeholder="Search by location, property, or agent name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -170,7 +215,7 @@ const Index = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search properties..."
+            placeholder="Search properties or agents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -213,7 +258,7 @@ const Index = () => {
                   {filteredProperties.length} Properties Found
                 </h2>
                 <p className="text-gray-600 mt-1">
-                  Discover your perfect home
+                  Discover your perfect home with our expert agents
                 </p>
               </div>
             </div>

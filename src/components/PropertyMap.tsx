@@ -13,6 +13,7 @@ interface Property {
   lat: number;
   lng: number;
   type: string;
+  agentName?: string;
 }
 
 interface PropertyMapProps {
@@ -70,6 +71,11 @@ const PropertyMap = ({ properties }: PropertyMapProps) => {
                   <MapPin className="h-3 w-3 mr-1" />
                   <span className="text-xs">{property.address}</span>
                 </div>
+                {property.agentName && (
+                  <div className="text-xs text-blue-600 font-medium mb-2">
+                    Agent: {property.agentName}
+                  </div>
+                )}
                 <div className="flex justify-between text-xs text-gray-700">
                   <span>{property.bedrooms} bed, {property.bathrooms} bath</span>
                   <span>{property.sqft.toLocaleString()} sqft</span>
