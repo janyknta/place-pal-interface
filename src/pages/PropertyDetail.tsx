@@ -1,6 +1,5 @@
-
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Bed, Bath, Square, Car, Wifi, Dumbbell, Swimming } from "lucide-react";
+import { ArrowLeft, MapPin, Bed, Bath, Square, Car, Wifi, Dumbbell, Waves } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -26,7 +25,7 @@ const mockProperty = {
   amenities: [
     { icon: Wifi, label: "High-Speed Internet" },
     { icon: Dumbbell, label: "Fitness Center" },
-    { icon: Swimming, label: "Pool" },
+    { icon: Waves, label: "Pool" },
     { icon: Car, label: "Parking Included" }
   ],
   agent: {
