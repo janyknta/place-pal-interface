@@ -1,86 +1,95 @@
 
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, MapPin, Bed, Bath, Square, Car, Wifi, Dumbbell, Waves } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-
-const baseMockProperty = {
-  id: 1,
-  title: "Modern Downtown Apartment",
-  price: 750000,
-  bedrooms: 2,
-  bathrooms: 2,
-  sqft: 1200,
-  images: [
-    "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=800&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop"
-  ],
-  address: "123 Main St, Downtown",
-  type: "apartment",
-  yearBuilt: 2020,
-  parkingSpaces: 1,
-  description: "This stunning modern apartment features floor-to-ceiling windows, high-end finishes, and an open-concept design. Located in the heart of downtown, you'll be walking distance to restaurants, shopping, and entertainment. The building offers luxury amenities including a fitness center, rooftop deck, and concierge service.",
-  amenities: [
-    { icon: Wifi, label: "High-Speed Internet" },
-    { icon: Dumbbell, label: "Fitness Center" },
-    { icon: Waves, label: "Pool" },
-    { icon: Car, label: "Parking Included" }
-  ],
-  agent: {
-    name: "Loading...",
-    phone: "(555) 123-4567",
-    email: "agent@estateview.com",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face"
-  }
-};
+import { supabase } from "@/integrations/supabase/client";
 
 const PropertyDetail = () => {
   const { id } = useParams();
-  const [property, setProperty] = useState(baseMockProperty);
 
-  // Fetch Indian agent name
-  useEffect(() => {
-    const fetchAgentName = async () => {
-      try {
-        const response = await fetch('https://api.namefake.com/indian-names/random/1');
-        const names = await response.json();
-        
-        setProperty(prev => ({
-          ...prev,
-          agent: {
-            ...prev.agent,
-            name: names[0] || "Rajesh Kumar Sharma",
-            email: `${names[0]?.toLowerCase().replace(/\s+/g, '.')}@estateview.com` || "agent@estateview.com"
-          }
-        }));
-      } catch (error) {
-        console.log('Failed to fetch Indian name, using fallback');
-        // Fallback Indian name if API fails
-        setProperty(prev => ({
-          ...prev,
-          agent: {
-            ...prev.agent,
-            name: "Rajesh Kumar Sharma",
-            email: "rajesh.kumar.sharma@estateview.com"
-          }
-        }));
-      }
-    };
+  const { data: property, isLoading, error } = useQuery({
+    queryKey: ['property', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    fetchAgentName();
-  }, []);
+      if (error) throw error;
+
+      // Transform database data to match expected format
+      const images = typeof property.images === 'string' 
+        ? JSON.parse(property.images || '[]') 
+        : property.images || [];
+      
+      const amenities = typeof property.amenities === 'string' 
+        ? JSON.parse(property.amenities || '[]') 
+        : property.amenities || [];
+
+      return {
+        ...data,
+        images: images.length > 0 ? images : [
+          "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=800&h=600&fit=crop",
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+          "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop",
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop"
+        ],
+        amenities: [
+          { icon: Wifi, label: "High-Speed Internet" },
+          { icon: Dumbbell, label: "Fitness Center" },
+          { icon: Waves, label: "Pool" },
+          { icon: Car, label: "Parking Included" }
+        ],
+        agent: {
+          name: data.agent_name || "Real Estate Agent",
+          phone: data.agent_phone || "(555) 123-4567",
+          email: data.agent_email || "agent@estateview.com",
+          image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face"
+        }
+      };
+    },
+    enabled: !!id
+  });
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(price);
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(1)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(1)} L`;
+    } else {
+      return `₹${price.toLocaleString('en-IN')}`;
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading property details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !property) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
+          <p className="text-gray-600 mb-4">The property you're looking for doesn't exist.</p>
+          <Link to="/" className="text-orange-600 hover:text-orange-700">
+            ← Back to Listings
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,7 +146,7 @@ const PropertyDetail = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="capitalize">
-                  {property.type}
+                  {property.property_type}
                 </Badge>
                 <span className="text-3xl font-bold text-blue-600">
                   {formatPrice(property.price)}
@@ -164,12 +173,12 @@ const PropertyDetail = () => {
               </div>
               <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                 <Square className="h-6 w-6 mx-auto text-gray-500 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">{property.sqft.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-gray-900">{property.sqft?.toLocaleString() || 'N/A'}</div>
                 <div className="text-sm text-gray-600">Sq Ft</div>
               </div>
               <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                 <Car className="h-6 w-6 mx-auto text-gray-500 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">{property.parkingSpaces}</div>
+                <div className="text-2xl font-bold text-gray-900">1</div>
                 <div className="text-sm text-gray-600">Parking</div>
               </div>
             </div>
@@ -178,10 +187,14 @@ const PropertyDetail = () => {
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">About This Property</h2>
-                <p className="text-gray-600 leading-relaxed">{property.description}</p>
-                <div className="mt-4 text-sm text-gray-500">
-                  Built in {property.yearBuilt}
-                </div>
+                <p className="text-gray-600 leading-relaxed">
+                  {property.description || 'This beautiful property offers modern amenities and excellent location. Perfect for those seeking comfort and convenience in their new home.'}
+                </p>
+                {property.year_built && (
+                  <div className="mt-4 text-sm text-gray-500">
+                    Built in {property.year_built}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
