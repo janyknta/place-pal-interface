@@ -43,7 +43,7 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-blue-600 hover:text-blue-700"
+            className="text-orange-600 hover:text-orange-700"
           >
             Clear All
           </Button>
@@ -53,14 +53,14 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
       <CardContent className="space-y-6">
         {/* Price Range */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium text-gray-700">Price Range</Label>
+          <Label className="text-sm font-medium text-gray-700">Price Range (₹)</Label>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="minPrice" className="text-xs text-gray-500">Min Price</Label>
               <Input
                 id="minPrice"
                 type="number"
-                placeholder="$0"
+                placeholder="0"
                 value={filters.minPrice}
                 onChange={(e) => updateFilter("minPrice", e.target.value)}
                 className="mt-1"
@@ -93,6 +93,7 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
               <SelectItem value="apartment">Apartment</SelectItem>
               <SelectItem value="townhouse">Townhouse</SelectItem>
               <SelectItem value="condo">Condo</SelectItem>
+              <SelectItem value="villa">Villa</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -140,25 +141,25 @@ const FilterSidebar = ({ filters, onFiltersChange }: FilterSidebarProps) => {
               variant="outline"
               size="sm"
               className="w-full justify-start"
-              onClick={() => onFiltersChange({ ...filters, maxPrice: "500000" })}
+              onClick={() => onFiltersChange({ ...filters, maxPrice: "5000000" })}
             >
-              Under $500K
+              Under ₹50 Lakh
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="w-full justify-start"
-              onClick={() => onFiltersChange({ ...filters, minPrice: "500000", maxPrice: "1000000" })}
+              onClick={() => onFiltersChange({ ...filters, minPrice: "5000000", maxPrice: "10000000" })}
             >
-              $500K - $1M
+              ₹50L - ₹1 Cr
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="w-full justify-start"
-              onClick={() => onFiltersChange({ ...filters, minPrice: "1000000" })}
+              onClick={() => onFiltersChange({ ...filters, minPrice: "10000000" })}
             >
-              Over $1M
+              Above ₹1 Crore
             </Button>
           </div>
         </div>
